@@ -36,7 +36,7 @@ namespace AudioToTextService.Core.AudioConverter
                     RedirectStandardError = true
                 };
 
-                using (Process p = ProcessHelper.Start(psi))
+                using (Process p = Process.Start(psi))
                 {
                     //* Read the output (or the error)
                     string ffmpegOutput = p.StandardOutput.ReadToEnd();
