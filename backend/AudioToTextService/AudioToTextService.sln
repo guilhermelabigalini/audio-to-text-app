@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioToTextService.Core", "AudioToTextService.Core\AudioToTextService.Core.csproj", "{8ABE6AC4-71D1-46A5-8812-3892AB9C9F99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioToTextService.Core", "AudioToTextService.Core\AudioToTextService.Core.csproj", "{8ABE6AC4-71D1-46A5-8812-3892AB9C9F99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioToTextService.Utility", "AudioToTextService.Utility\AudioToTextService.Utility.csproj", "{43940224-4348-4095-85D2-BB5A59A7B6FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioToTextService.Utility", "AudioToTextService.Utility\AudioToTextService.Utility.csproj", "{43940224-4348-4095-85D2-BB5A59A7B6FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioToTextService.Web", "AudioToTextService.Web\AudioToTextService.Web.csproj", "{6F126337-4822-476B-B121-13DD7BD29507}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{43940224-4348-4095-85D2-BB5A59A7B6FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43940224-4348-4095-85D2-BB5A59A7B6FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43940224-4348-4095-85D2-BB5A59A7B6FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F126337-4822-476B-B121-13DD7BD29507}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F126337-4822-476B-B121-13DD7BD29507}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F126337-4822-476B-B121-13DD7BD29507}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F126337-4822-476B-B121-13DD7BD29507}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
