@@ -57,8 +57,38 @@ namespace AudioToTextService.Core.AudioDecoder
             // Create a a speech client
             using (var speechClient = new SpeechClient(preferences))
             {
-                speechClient.SubscribeToPartialResult(this.OnPartialResult);
-                speechClient.SubscribeToRecognitionResult(this.OnRecognitionResult);
+                speechClient.SubscribeToPartialResult((args) =>
+                {
+                    Console.WriteLine("--- Partial result received by OnPartialResult ---");
+
+                    // Print the partial response recognition hypothesis.
+                    Console.WriteLine(args.DisplayText);
+
+                    Console.WriteLine();
+
+                    return CompletedTask;
+                });
+
+                speechClient.SubscribeToRecognitionResult((args) =>
+                {
+                    Console.WriteLine();
+
+                    Console.WriteLine("--- Phrase result received by OnRecognitionResult ---");
+
+                    // Print the recognition status.
+                    Console.WriteLine("***** Phrase Recognition Status = [{0}] ***", args.RecognitionStatus);
+                    if (args.Phrases != null)
+                    {
+                        foreach (var result in args.Phrases)
+                        {
+                            // Print the recognition phrase display text.
+                            Console.WriteLine("{0} (Confidence:{1})", result.DisplayText, result.Confidence);
+                        }
+                    }
+
+                    Console.WriteLine();
+                    return CompletedTask;
+                });
 
                 // create an audio content and pass it a stream.
                 var deviceMetadata = new DeviceMetadata(DeviceType.Near, DeviceFamily.Desktop, NetworkType.Ethernet, OsName.Windows, "1607", "Dell", "T3600");
@@ -67,55 +97,6 @@ namespace AudioToTextService.Core.AudioDecoder
 
                 await speechClient.RecognizeAsync(new SpeechInput(stream, requestMetadata), this.cts.Token).ConfigureAwait(false);
             }
-        }
-
-
-        /// <summary>
-        /// Invoked when the speech client receives a partial recognition hypothesis from the server.
-        /// </summary>
-        /// <param name="args">The partial response recognition result.</param>
-        /// <returns>
-        /// A task
-        /// </returns>
-        private Task OnPartialResult(RecognitionPartialResult args)
-        {
-            Console.WriteLine("--- Partial result received by OnPartialResult ---");
-
-            // Print the partial response recognition hypothesis.
-            Console.WriteLine(args.DisplayText);
-
-            Console.WriteLine();
-
-            return CompletedTask;
-        }
-
-        /// <summary>
-        /// Invoked when the speech client receives a phrase recognition result(s) from the server.
-        /// </summary>
-        /// <param name="args">The recognition result.</param>
-        /// <returns>
-        /// A task
-        /// </returns>
-        private Task OnRecognitionResult(RecognitionResult args)
-        {
-            var response = args;
-            Console.WriteLine();
-
-            Console.WriteLine("--- Phrase result received by OnRecognitionResult ---");
-
-            // Print the recognition status.
-            Console.WriteLine("***** Phrase Recognition Status = [{0}] ***", response.RecognitionStatus);
-            if (response.Phrases != null)
-            {
-                foreach (var result in response.Phrases)
-                {
-                    // Print the recognition phrase display text.
-                    Console.WriteLine("{0} (Confidence:{1})", result.DisplayText, result.Confidence);
-                }
-            }
-
-            Console.WriteLine();
-            return CompletedTask;
         }
     }
 }
