@@ -1,4 +1,5 @@
 ﻿using AudioToTextService.Core.AudioConverter;
+using AudioToTextService.Core.AudioDecoder;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -10,29 +11,63 @@ namespace AudioToTextService.Utility
     {
         static IConfigurationRoot config;
 
-        static void Main(string[] args)
+        /*
+         * converttowav "D:\temp\audio2" "D:\temp\g1.wav"
+         * 
+         * decodetotext "D:\temp\g1.wav" 1 pt-BR
+         * decodetotext "D:\temp\audio2" 1 pt-BR
+         * 
+         */
+        static int Main(string[] args)
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Invalid parameters, expected:");
-                Console.WriteLine("AudioToTextService.Utility <action> <inputfile> [outputfile]");
-                Console.WriteLine("\taction: converttowav or decodetotext");
-                Console.WriteLine("\tinputfile: input audio file to be processed");
-                Console.WriteLine("\toutputfile: output audio file, just applied when action is converttowav");
+                return PrintHelpAndTerminate();
             }
 
             var action = args[0];
-            var input = args[1];
-            var output = (args.Length >= 3 ? args[2] : null);
 
             LoadSettings();
 
-            if (action == "converttowav")
-                new ConverttowavHandler().Handle(config, input, output).Wait();
+            if (action == "converttowav" && args.Length == 3)
+            {
+                if (args.Length != 3)
+                {
+                    return PrintHelpAndTerminate();
+                }
+                var input = args[1];
+                var output = args[2];
+                return new ConverttowavHandler().Handle(config, input, output).Result;
+            }
+            else if (action == "decodetotext" && args.Length == 4) 
+            {
+                var input = args[1];
+                var mode = (args[2] == "1" ? PhraseMode.ShortPhrase: PhraseMode.LongDictation);
+                var locale = args[3];
 
-            if (action == "decode")
-                Handle_decode(config, input);
+                return new decodetotextHandle().Handle(config, input, mode, locale).Result;
+            }
 
+            return PrintHelpAndTerminate();
+        }
+
+        private static int PrintHelpAndTerminate()
+        {
+            Console.WriteLine("Invalid parameters, expected:");
+            Console.WriteLine("AudioToTextService.Utility <action> [parameters...]");
+            Console.WriteLine("\taction: converttowav or decodetotext");
+            Console.WriteLine();
+            Console.WriteLine("\t\twhen action: converttowav");
+            Console.WriteLine("\t\tAudioToTextService.Utility converttowav <inputfile> <outputfile>");
+            Console.WriteLine("\t\tinputfile: input audio file to be processed");
+            Console.WriteLine("\t\toutputfile: output audio file, just applied when action is converttowav");
+            Console.WriteLine();
+            Console.WriteLine("\t\twhen action: decodetotext");
+            Console.WriteLine("\t\tAudioToTextService.Utility decodetotext <inputfile> <mode> <locale>");
+            Console.WriteLine("\t\tinputfile: input audio file to be processed");
+            Console.WriteLine("\t\tmode: 1 for ShortPhrase, 2 for LongDictation");
+            Console.WriteLine("\t\tlocale: locale of the source audio (pt-BR, en-US, ...)");
+            return 1;
         }
 
         private static void LoadSettings()
@@ -43,12 +78,5 @@ namespace AudioToTextService.Utility
 
             config = builder.Build();
         }
-
-        private static void Handle_decode(IConfigurationRoot config, string input)
-        {
-            throw new NotImplementedException();
-        }
-
-        
     }
 }

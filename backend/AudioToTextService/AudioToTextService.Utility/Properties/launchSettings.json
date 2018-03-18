@@ -2,7 +2,7 @@
   "profiles": {
     "AudioToTextService.Utility": {
       "commandName": "Project",
-      "commandLineArgs": "converttowav \"D:\\temp\\audio2\" \"D:\\temp\\g1.wav\""
+      "commandLineArgs": "decodetotext \"D:\\temp\\audio2\" 1 pt-BR"
     }
   }
 }

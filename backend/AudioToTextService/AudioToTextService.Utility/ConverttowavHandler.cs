@@ -11,15 +11,21 @@ namespace AudioToTextService.Utility
 {
     class ConverttowavHandler
     {
-        public async Task Handle(IConfigurationRoot config, string input, string output)
+        public async Task<int> Handle(IConfigurationRoot config, string input, string output)
         {
+            if (! File.Exists(input))
+            {
+                Console.WriteLine("Invalid input file");
+                return 1;
+            }
+
             if (File.Exists(output))
             {
                 Console.WriteLine("Replace destination? y/n: ");
                 if (Console.Read() == (int)'y')
                     File.Delete(output);
                 else
-                    Environment.Exit(0);
+                    return 1;
             }
 
             using (FileStream istream = new FileStream(input, FileMode.Open, FileAccess.Read))
@@ -36,6 +42,8 @@ namespace AudioToTextService.Utility
                     Console.WriteLine("Saved audio");
                 }
             }
+
+            return 0;
         }
     }
 }

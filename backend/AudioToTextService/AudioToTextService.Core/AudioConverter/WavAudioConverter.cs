@@ -27,12 +27,14 @@ namespace AudioToTextService.Core.AudioConverter
                 var outputFile = Path.ChangeExtension(Path.GetTempFileName(), ".wav");
                 var cmd = String.Format(ToWavCmdLine, inputFile.FileName, outputFile);
 
-                ProcessStartInfo psi = new ProcessStartInfo(ffmpegPath, cmd);
-                psi.UseShellExecute = false;
-                psi.CreateNoWindow = true;
-                psi.WorkingDirectory = Directory.GetCurrentDirectory();
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
+                ProcessStartInfo psi = new ProcessStartInfo(ffmpegPath, cmd)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = Directory.GetCurrentDirectory(),
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
 
                 using (Process p = ProcessHelper.Start(psi))
                 {
