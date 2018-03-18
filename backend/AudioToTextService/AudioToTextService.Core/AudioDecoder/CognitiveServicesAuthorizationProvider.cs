@@ -22,6 +22,8 @@ namespace AudioToTextService.Core.AudioDecoder
     /// </summary>
     public sealed class CognitiveServicesAuthorizationProvider : IAuthorizationProvider
     {
+        private static object locker = new object();
+
         /// <summary>
         /// The fetch token URI
         /// </summary>
@@ -31,6 +33,29 @@ namespace AudioToTextService.Core.AudioDecoder
         /// The subscription key
         /// </summary>
         private readonly string subscriptionKey;
+
+        private static HttpClient httpClient;
+
+        private static HttpClient GetHttpClient(string fetchUri, string subscriptionKey)
+        {
+            if (httpClient == null)
+            {
+                lock (locker)
+                {
+                    if (httpClient == null)
+                    {
+                        if (!fetchUri.EndsWith("/"))
+                            fetchUri += "/";
+
+                        httpClient = new HttpClient();
+                        httpClient.BaseAddress = new Uri(fetchUri);
+                        httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                    }
+                }
+            }
+
+            return httpClient;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CognitiveServicesAuthorizationProvider" /> class.
@@ -73,7 +98,7 @@ namespace AudioToTextService.Core.AudioDecoder
         /// <returns>An access token.</returns>
         private static async Task<string> FetchToken(string fetchUri, string subscriptionKey)
         {
-            using (var client = new HttpClient())
+            /*using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
                 var uriBuilder = new UriBuilder(fetchUri);
@@ -83,6 +108,12 @@ namespace AudioToTextService.Core.AudioDecoder
                 {
                     return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                 }
+            }*/
+            
+            var client = GetHttpClient(fetchUri, subscriptionKey);
+            using (var result = await client.PostAsync("issueToken", null).ConfigureAwait(false))
+            {
+                return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
         }
     }
