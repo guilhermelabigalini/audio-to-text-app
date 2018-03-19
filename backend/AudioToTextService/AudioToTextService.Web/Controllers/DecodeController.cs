@@ -46,6 +46,9 @@ namespace AudioToTextService.Web.Controllers
 
             var file = Request.Files[0];
 
+            Response.Buffer = false;
+            Response.ContentType = "text/plain";
+
             using (Stream wavStream = await new WavAudioConverter(configuration).ConvertAsync(file.InputStream))
             {
                 PhraseMode mode = PhraseMode.ShortPhrase;
@@ -53,11 +56,13 @@ namespace AudioToTextService.Web.Controllers
                     (args) =>
                     {
                         Response.Write(JsonConvert.SerializeObject(args));
+                        Response.Write(Environment.NewLine);
                         return Response.FlushAsync();
                     },
                     (args) =>
                     {
                         Response.Write(JsonConvert.SerializeObject(args));
+                        Response.Write(Environment.NewLine);
                         return Response.FlushAsync();
                     });
             }
