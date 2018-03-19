@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using AudioToTextService.Core.AudioConverter;
+using System.IO;
 using System.Threading.Tasks;
 
-namespace AudioToTextService.Core
+namespace AudioToTextService.Core.AudioConverter
 {
     public interface IAudioConverter
     {
-        Task<Stream> ConvertAsync(Stream stream);
+        Task<WavStream> ConvertAsync(Stream stream);
     }
 }

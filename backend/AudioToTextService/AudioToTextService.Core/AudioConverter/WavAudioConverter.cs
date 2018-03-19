@@ -17,7 +17,7 @@ namespace AudioToTextService.Core.AudioConverter
             this.configuration = configuration;
         }
 
-        public async Task<Stream> ConvertAsync(Stream stream)
+        public async Task<WavStream> ConvertAsync(Stream stream)
         {
             var section = configuration.GetSection("AudioToTextService.Core.WavAudioConverter");
             var ffmpegPath = section["ffmpeg"];
@@ -49,9 +49,34 @@ namespace AudioToTextService.Core.AudioConverter
                         throw new Exception(ffmpegOutput + ffmpegErrOutput);
                     }
 
-                    return new TempFileStream(outputFile, FileMode.Open, FileAccess.Read);
+                    TimeSpan ts = ParseTimeFromFFMpegOutput(ffmpegErrOutput);
+
+                    return new WavStream(outputFile, FileMode.Open, FileAccess.Read, ts);
                 }
             }
+        }
+
+        private static TimeSpan ParseTimeFromFFMpegOutput(string ffmpegErrOutput)
+        {
+            TimeSpan ts = TimeSpan.Zero;
+            try
+            {
+                const string TimeKey = "time=";
+                int timePos = ffmpegErrOutput.IndexOf(TimeKey);
+                if (timePos > 0)
+                {
+                    int timeEndPos = ffmpegErrOutput.IndexOf(" ", timePos + 1);
+                    if (timeEndPos > 0)
+                    {
+                        string timeStr = ffmpegErrOutput.Substring(timePos + TimeKey.Length, timeEndPos - timePos - TimeKey.Length);
+                        ts = TimeSpan.Parse(timeStr);
+                    }
+                }
+            }
+            catch (Exception)
+            { }
+
+            return ts;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace AudioToTextService.Core
 {
-    internal class TempFileStream : FileStream
+    public class TempFileStream : FileStream
     {
         public TempFileStream(string path, FileMode mode, FileAccess access)
             : base(path, mode, access)

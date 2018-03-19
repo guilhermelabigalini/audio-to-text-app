@@ -16,7 +16,7 @@ namespace AudioToTextService.Web
     {
         private IConfiguration LoadSettings()
         {
-            var currentDir = Server.MapPath("~/App_Data");
+           var currentDir = Server.MapPath("~/App_Data");
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(currentDir)
