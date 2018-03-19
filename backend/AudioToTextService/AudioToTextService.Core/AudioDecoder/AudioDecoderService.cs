@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,11 +28,6 @@ namespace AudioToTextService.Core.AudioDecoder
         private static readonly Uri LongDictationUrl = new Uri(@"wss://speech.platform.bing.com/api/service/recognition/continuous");
 
         /// <summary>
-        /// A completed task
-        /// </summary>
-        private static readonly Task CompletedTask = Task.FromResult(true);
-
-        /// <summary>
         /// Cancellation token used to stop sending the audio.
         /// </summary>
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
@@ -45,7 +41,9 @@ namespace AudioToTextService.Core.AudioDecoder
 
         public async Task DecodeAudioAsync(
             Stream stream, 
-            string locale, PhraseMode mode, IAudioDecoderListener decoderListener)
+            string locale, PhraseMode mode, 
+            Func<RecognitionStep, Task> partialResult,
+            Func<RecognitionFinalResult, Task> finalResult)
         {
             var serviceUrl = (mode == PhraseMode.LongDictation ? LongDictationUrl : ShortPhraseUrl);
 
@@ -59,35 +57,12 @@ namespace AudioToTextService.Core.AudioDecoder
             {
                 speechClient.SubscribeToPartialResult((args) =>
                 {
-                    Console.WriteLine("--- Partial result received by OnPartialResult ---");
-
-                    // Print the partial response recognition hypothesis.
-                    Console.WriteLine(args.DisplayText);
-
-                    Console.WriteLine();
-
-                    return CompletedTask;
+                    return partialResult(ToStep(args));
                 });
 
                 speechClient.SubscribeToRecognitionResult((args) =>
                 {
-                    Console.WriteLine();
-
-                    Console.WriteLine("--- Phrase result received by OnRecognitionResult ---");
-
-                    // Print the recognition status.
-                    Console.WriteLine("***** Phrase Recognition Status = [{0}] ***", args.RecognitionStatus);
-                    if (args.Phrases != null)
-                    {
-                        foreach (var result in args.Phrases)
-                        {
-                            // Print the recognition phrase display text.
-                            Console.WriteLine("{0} (Confidence:{1})", result.DisplayText, result.Confidence);
-                        }
-                    }
-
-                    Console.WriteLine();
-                    return CompletedTask;
+                    return finalResult(ToFinalResult(args));
                 });
 
                 // create an audio content and pass it a stream.
@@ -97,6 +72,27 @@ namespace AudioToTextService.Core.AudioDecoder
 
                 await speechClient.RecognizeAsync(new SpeechInput(stream, requestMetadata), this.cts.Token).ConfigureAwait(false);
             }
+        }
+
+        private RecognitionFinalResult ToFinalResult(RecognitionResult args)
+        {
+            return new RecognitionFinalResult()
+            {
+                RecognitionStatus = (RecognitionFinalStatus)(int)args.RecognitionStatus,
+                Phrases = args.Phrases?.Select(i => ToStep(i)).ToList()                
+            };
+        }
+
+        private RecognitionStep ToStep(RecognitionPhrase args)
+        {
+            return new RecognitionStep()
+            {
+                Confidence = (RecognitionConfidence)(int)args.Confidence,
+                DisplayText = args.DisplayText,
+                LexicalForm = args.LexicalForm,
+                MediaDuration = args.MediaDuration,
+                MediaTime = args.MediaTime
+            };
         }
     }
 }
