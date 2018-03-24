@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">AudioToText</string>
+
+    <string-array name="supported_decode_languages">
+        <item>en-US</item>
+        <item>pt-BR</item>
+        <item>ar-EG</item>
+        <item>de-DE</item>
+        <item>es-ES</item>
+        <item>fr-FR</item>
+        <item>It-IT</item>
+        <item>ja-JP</item>
+        <item>ru-RU</item>
+        <item>zh-CN</item>
+    </string-array>
+
+</resources>
