@@ -8,8 +8,10 @@
 @using (Html.BeginForm("Post", "Decode", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     <fieldset>
+        Culture:
+        <input type="text" value="pt-BR" id="culture" name="culture" />
         Select file:
         <input type="file" name="file" />
         <input type="submit" value="Upload" />
-        </fieldset>
+    </fieldset>
 }

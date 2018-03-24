@@ -32,7 +32,7 @@ namespace AudioToTextService.Web.Controllers
         }
 
         [HttpPost]
-        public async System.Threading.Tasks.Task<ActionResult> Post(string culture = "pt-BR")
+        public async System.Threading.Tasks.Task<ActionResult> Post(string culture)
         {
             /*
             foreach (String key in Request.Files)
@@ -42,7 +42,7 @@ namespace AudioToTextService.Web.Controllers
             }
             */
 
-            if (Request.Files.Count != 1)
+            if (String.IsNullOrEmpty(culture) || Request.Files.Count != 1)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var file = Request.Files[0];

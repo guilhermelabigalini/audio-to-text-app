@@ -193,6 +193,7 @@
     </Content>
     <None Include="packages.config" />
     <Content Include="Views\Decode\Index.cshtml" />
+    <None Include="Properties\PublishProfiles\AudioToTextServiceWeb - Web Deploy.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AudioToTextService.Core\AudioToTextService.Core.csproj">
