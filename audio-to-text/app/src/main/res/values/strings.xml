@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">AudioToText</string>
 
+    <string name="activity_main_txtLanguageToDecode">Language to decode</string>
+
     <string-array name="supported_decode_languages">
         <item>en-US</item>
         <item>pt-BR</item>

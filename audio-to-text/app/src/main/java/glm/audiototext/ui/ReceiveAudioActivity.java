@@ -10,26 +10,69 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import java.util.concurrent.Executors;
+
 import glm.audiototext.Preferences;
 import glm.audiototext.R;
 import glm.audiototext.decoder.DecoderListener;
+import glm.audiototext.decoder.FinalResult;
+import glm.audiototext.decoder.PartialResult;
 
 public class ReceiveAudioActivity extends AppCompatActivity implements DecoderListener {
-    @Override
-    public void onPartialResult(String message) {
+    private RecognitionTask recognitionTask;
+    private StringBuilder stringBuilderDecodedText;
+    private Exception lastError;
 
+    private void showText(final CharSequence stringBuilder){
+        final EditText edtDecoded = this.activity_receive_edtDecoded;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                edtDecoded.setText(stringBuilder);
+                edtDecoded.setSelection(edtDecoded.getText().length());
+            }
+        });
     }
 
     @Override
-    public void onFailed(String message) {
-
+    public void onError(Exception e) {
+        lastError = e;
     }
 
-    public enum FinalResponseStatus { NotReceived, OK, Timeout }
+    @Override
+    public void onCompleted() {
+        if (this.lastError != null) {
+            showText(this.lastError.toString());
+        }
+        else {
+            showText(stringBuilderDecodedText);
+        }
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setConvertisionProgress(false);
+            }
+        });
+        this.recognitionTask = null;
+    }
+
+    @Override
+    public void onPartialResult(PartialResult message) {
+
+        final StringBuilder tempResult = new StringBuilder();
+        tempResult.append(stringBuilderDecodedText);
+        tempResult.append(message.getDisplayText());
+        showText(tempResult);
+    }
+
+    @Override
+    public void onFinalResult(FinalResult message) {
+        stringBuilderDecodedText.append(message.getPhrases().get(0).getDisplayText());
+        showText(stringBuilderDecodedText);
+    }
 
     public static final String LOG = "ReceiveAudioActivity";
-    FinalResponseStatus isReceivedResponse = FinalResponseStatus.NotReceived;
-
 
     private EditText activity_receive_edtDecoded;
     private ProgressBar activity_receive_pgBarConvert;
@@ -39,7 +82,7 @@ public class ReceiveAudioActivity extends AppCompatActivity implements DecoderLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receive_audio);
 
-
+        this.lastError = null;
         this.activity_receive_edtDecoded = findViewById(R.id.activity_receive_edtDecoded);
         this.activity_receive_pgBarConvert = findViewById(R.id.activity_receive_pgBarConvert);
         
@@ -90,23 +133,18 @@ public class ReceiveAudioActivity extends AppCompatActivity implements DecoderLi
     }
 
     private void decodeToText(Uri resource) {
+        if (this.recognitionTask != null)
+            return;
+
         Log.v(LOG, "decodeToText, resource = " + resource.toString());
 
         setConvertisionProgress(true);
 
-        new RecognitionTask(this, this, getCulture(), resource) {
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                setConvertisionProgress(false);
-            }
-
-            @Override
-            protected void onCancelled() {
-                setConvertisionProgress(false);
-            }
-        };
+        this.stringBuilderDecodedText = new StringBuilder();
+        this.recognitionTask = new RecognitionTask(this, this, getCulture(), resource);
+        this.recognitionTask.execute((Void)null);
     }
-
+/*
     private void WriteLine() {
         this.WriteLine("");
     }
@@ -114,7 +152,7 @@ public class ReceiveAudioActivity extends AppCompatActivity implements DecoderLi
     private void WriteLine(String text) {
         this.activity_receive_edtDecoded.append(text + "\n");
     }
-/*
+
     @Override
     public void onPartialResponseReceived(String response) {
         this.WriteLine("--- Partial result received by onPartialResponseReceived() ---");

@@ -122,6 +122,22 @@ public class MultipartUtility implements Closeable {
         writer.flush();
     }
 
+    public InputStream getInputStream() throws IOException {
+
+        writer.append(LINE_FEED).flush();
+        writer.append("--" + boundary + "--").append(LINE_FEED);
+        writer.close();
+
+        // checks server's status code first
+        int status = httpConn.getResponseCode();
+        if (status == HttpURLConnection.HTTP_OK) {
+            return httpConn.getInputStream();
+        } else {
+            throw new IOException("Server returned non-OK status: " + status);
+        }
+    }
+
+
     /**
      * Completes the request and receives response from the server.
      *
@@ -129,7 +145,7 @@ public class MultipartUtility implements Closeable {
      * status OK, otherwise an exception is thrown.
      * @throws IOException
      */
-    public String finish() throws IOException {
+    /*public String finish() throws IOException {
         StringBuffer response = new StringBuffer();
 
         writer.append(LINE_FEED).flush();
@@ -152,7 +168,7 @@ public class MultipartUtility implements Closeable {
         }
 
         return response.toString();
-    }
+    }*/
 
     @Override
     public void close() throws IOException {

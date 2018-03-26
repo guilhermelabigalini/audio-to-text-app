@@ -46,6 +46,8 @@ public class RecognitionTask extends AsyncTask<Void, Integer, Void> {
             e.printStackTrace();
         }
 
+        publishProgress(100);
+
         return null;
     }
 }
